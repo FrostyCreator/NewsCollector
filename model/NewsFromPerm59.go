@@ -66,7 +66,7 @@ func (news NewsFromPerm59) ConvertToSliceOneNews() (*[]OneNews) {
 		*result = append(*result, OneNews{
 			Header: n.Header,
 			URL:    n.Urls.URL,
-			Site:   "https://59.ru/",
+			Site:   "https://59.ru",
 		})
 	}
 	return result
