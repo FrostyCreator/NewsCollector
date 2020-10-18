@@ -2,32 +2,31 @@ package server
 
 import (
 	"context"
+	"github.com/FrostyCreator/NewsCollector/service"
 	"log"
 
 	"github.com/FrostyCreator/NewsCollector/config"
-	"github.com/FrostyCreator/NewsCollector/store/db"
-
-	"github.com/gin-gonic/gin"
 )
 
 type Server struct {
 	context 	context.Context
 	config 		*config.Config
-	router		*gin.Engine
-	db 			*db.PgDB
+	Router
+	NewsPgRepo	service.NewsRepository
 }
 
 // Init returns new server instance
-func Init(ctx context.Context, config *config.Config, db *db.PgDB, addr string) (*Server, error) {
-	router := gin.Default()
+func Init(ctx context.Context, config *config.Config, db service.NewsRepository, r Router, addr string) (*Server, error) {
 	s := &Server{
 		context:	ctx,
 		config:		config,
-		router:		router,
-		db:			db,
+		Router:		r,
+		NewsPgRepo:	db,
 	}
-	s.routes()
-	if err := s.router.Run(addr); err != nil {
+
+	s.Router.routes()
+
+	if err := s.Router.router.Run(addr); err != nil {
 		log.Fatal(err)
 		return nil, err
 	}

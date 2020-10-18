@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"fmt"
+	"github.com/FrostyCreator/NewsCollector/controller"
 	"log"
 
 	"github.com/FrostyCreator/NewsCollector/config"
@@ -29,9 +30,13 @@ func run() error {
 		return err
 	}
 
+	newsRepo := db.NewNewsRepo(pgDB)
+	newsController := controller.NewNewsController(ctx, newsRepo)
+	router := server.NewRouter(newsController)
+
 	// create new server instance and run http server
 	addr := ":8080"
-	_, err = server.Init(ctx, cfg, pgDB, addr)
+	_, err = server.Init(ctx, cfg, newsRepo, *router,  addr)
 	if err != nil {
 		log.Fatal(err)
 	}
