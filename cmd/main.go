@@ -34,6 +34,9 @@ func run() error {
 	newsController := controller.NewNewsController(ctx, newsRepo)
 	router := server.NewRouter(newsController)
 
+	// Обновление новостей в бд
+	newsController.AddNews()
+
 	// create new server instance and run http server
 	addr := ":8080"
 	_, err = server.Init(ctx, cfg, newsRepo, *router,  addr)

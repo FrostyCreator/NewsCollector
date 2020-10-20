@@ -30,19 +30,25 @@ func (r Router) routes() {
 	})
 
 	r.router.GET("/update", func(context *gin.Context) {
-		err := r.controller.UpdateNews(context)
+		err := r.controller.UpdateAllNews()
 		if err != nil {
 			log.Fatal(err)
-			context.JSON(500, "")
+			context.JSON(500, gin.H{
+				"message": "Произошла ошибка при обновлении данных",
+			})
 		}
-		context.JSON(200, "")
+		context.JSON(200, gin.H{
+			"message": "Данные обновлены",
+		})
 	})
 
 	r.router.GET("/getNews", func(context *gin.Context) {
-		news, err := r.controller.GetAllNews(context)
+		news, err := r.controller.GetAllNews()
 		if err != nil {
 			log.Fatal(err)
-			context.JSON(500, "")
+			context.JSON(500, gin.H{
+				"message": "Произошла ошибка при обновлении данных",
+			})
 		}
 
 		context.JSON(200, *news)

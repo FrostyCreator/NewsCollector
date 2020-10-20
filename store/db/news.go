@@ -3,8 +3,8 @@ package db
 import (
 	"context"
 	"fmt"
-
 	"github.com/FrostyCreator/NewsCollector/model"
+	"log"
 
 	"github.com/go-pg/pg/v10"
 )
@@ -57,11 +57,31 @@ func (repo *NewsPgRepo) CreateNews(ctx context.Context, oneNews *model.OneNews) 
 	return oneNews, nil
 }
 
+func (repo *NewsPgRepo) CreateSliceNews(ctx context.Context, news *[]model.OneNews) (*[]model.OneNews, error) {
+	_, err := repo.db.Model(news).Insert()
+	if err != nil {
+		log.Fatal(err)
+		return nil, err
+	}
+	return news, nil
+}
+
 func (repo *NewsPgRepo) UpdateNews(ctx context.Context, oneNews *model.OneNews) (*model.OneNews, error) {
-	_, err := repo.db.Model(oneNews).
-		WherePK().
-		Returning("*").
-		Update()
+	_, err := repo.db.Model(oneNews).Update()
+
+	if err != nil {
+		if err == pg.ErrNoRows { //not found
+			return nil, nil
+		}
+		return nil, err
+	}
+
+	return oneNews, nil
+}
+
+func (repo *NewsPgRepo) UpdateSliceNews(ctx context.Context, oneNews *[]model.OneNews) (*[]model.OneNews, error) {
+	_, err := repo.db.Model(oneNews).Update()
+
 	if err != nil {
 		if err == pg.ErrNoRows { //not found
 			return nil, nil

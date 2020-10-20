@@ -4,12 +4,15 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"github.com/FrostyCreator/NewsCollector/model"
-	"github.com/FrostyCreator/NewsCollector/service"
-	"github.com/gin-gonic/gin"
 	"io/ioutil"
 	"log"
 	"net/http"
+
+	"github.com/FrostyCreator/NewsCollector/model"
+	"github.com/FrostyCreator/NewsCollector/service"
+
+	"github.com/gin-gonic/gin"
+	"github.com/gocolly/colly/v2"
 )
 
 type NewsController struct {
@@ -24,10 +27,7 @@ func NewNewsController(ctx context.Context, newsRep service.NewsRepository) *New
 	}
 }
 
-
-
 func (ctr *NewsController) Test(ctx *gin.Context) error{
-	//var oneNews model.OneNews
 	ctx.JSON(200, gin.H{
 		"message": "test",
 	})
@@ -35,20 +35,38 @@ func (ctr *NewsController) Test(ctx *gin.Context) error{
 	return nil
 }
 
-func (ctr *NewsController) UpdateNews(ctx *gin.Context) error {
+
+// UpdateNews Обновить список новостей в бд
+func (ctr *NewsController) AddNews() error {
+	//	Добавить новости с сайта https://59.ru
 	news, err := getNewsFromPerm59();
 	if err != nil {
 		log.Fatal(err)
 		return err
 	}
-	for _, n := range *news {
-		ctr.newsRepo.CreateNews(ctr.ctx, &n)
+	_, err = ctr.newsRepo.CreateSliceNews(ctr.ctx, news)
+	if err != nil {
+		log.Fatal(err)
+		return err
+	}
+
+	//	Добавить новости с сайта https://properm.ru/
+	news, err = getNewsFromProperm()
+	if err != nil {
+		log.Fatal(err)
+		return err
+	}
+	_, err = ctr.newsRepo.CreateSliceNews(ctr.ctx, news)
+	if err != nil {
+		log.Fatal(err)
+		return err
 	}
 
 	return nil;
 }
 
-func (ctr * NewsController) GetAllNews(ctx  *gin.Context) (*[]model.OneNews, error) {
+// GetAllNews Вернуть все новости из бд
+func (ctr *NewsController) GetAllNews() (*[]model.OneNews, error) {
 	news, err := ctr.newsRepo.GetNews(ctr.ctx);
 	if err != nil {
 		return nil, err
@@ -59,6 +77,34 @@ func (ctr * NewsController) GetAllNews(ctx  *gin.Context) (*[]model.OneNews, err
 	return news, err
 }
 
+func (ctr *NewsController) UpdateAllNews() error {
+	news, err := getNewsFromPerm59();
+	if err != nil {
+		log.Fatal(err)
+		return err
+	}
+	_, err = ctr.newsRepo.UpdateSliceNews(ctr.ctx, news)
+	if err != nil {
+		log.Fatal(err)
+		return err
+	}
+
+	//	Добавить новости с сайта https://properm.ru/
+	news, err = getNewsFromProperm()
+	if err != nil {
+		log.Fatal(err)
+		return err
+	}
+	_, err = ctr.newsRepo.UpdateSliceNews(ctr.ctx, news)
+	if err != nil {
+		log.Fatal(err)
+		return err
+	}
+
+	return nil;
+}
+
+// getNewsFromPerm59 получить все новости с сайта https://59.ru
 func getNewsFromPerm59() (*[]model.OneNews, error) {
 	var newsFromPerm59 *model.NewsFromPerm59
 	url := "https://newsapi.59.ru/v1/public/jtnews/records/?page=1&pagesize=40&text=ПГАТУ&sort=weight&pageType=search&regionId=59"
@@ -86,5 +132,28 @@ func getNewsFromPerm59() (*[]model.OneNews, error) {
 	}
 
 	return newsFromPerm59.ConvertToSliceOneNews(), nil;
+}
+
+// getNewsFromProperm получить новости с сайта https://properm.ru/
+func getNewsFromProperm() (*[]model.OneNews, error) {
+	url := "https://properm.ru/news/search/?searchString=%D0%9F%D0%93%D0%90%D0%A2%D0%A3"
+	newsFromProperm := new([]model.OneNews)
+	c := colly.NewCollector()
+
+	c.OnHTML("a.new-news-piece__link", func(e *colly.HTMLElement) {
+		*newsFromProperm = append(*newsFromProperm, model.OneNews{
+			Header: e.Text,
+			URL:    e.Attr("href"),
+			Site:   "https://properm.ru",
+		})
+	})
+
+
+	if err := c.Visit(url); err != nil {
+		log.Fatal("Ошибка во время парсинга сайта -", url)
+		return nil, err
+	}
+
+	return newsFromProperm, nil
 }
 
