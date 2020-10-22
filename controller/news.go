@@ -142,8 +142,6 @@ func (ctr *NewsController) getAllNewsFromSites() (*[]model.OneNews, error) {
 		return nil, err
 	}
 
-	//	Добавить новости с сайта https://properm.ru/
-
 	sliceNews, err := getNewsFromProperm(id)
 	if err != nil {
 		log.Fatal(err)
