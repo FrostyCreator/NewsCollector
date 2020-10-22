@@ -1,7 +1,7 @@
 package model
 
 type Convertable interface {
-	ConvertToSliceOneNews(*[]OneNews)
+	ConvertToSliceOneNews(*int) (*[]OneNews)
 }
 
 type OneNews struct {

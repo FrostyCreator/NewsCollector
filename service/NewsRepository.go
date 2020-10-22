@@ -8,10 +8,10 @@ import (
 
 type NewsRepository interface {
 	// GetNews Получить все новости
-	GetNews(context.Context) (*[]model.OneNews, error)
+	GetAllNews(context.Context) (*[]model.OneNews, error)
 
 	// GetOneNewaById Получить одну новость по id
-	GetOneNewaById(context.Context, int) (*model.OneNews, error)
+	GetOneNewsById(context.Context, int) (*model.OneNews, error)
 
 	// CreateNews Добавить одну новость в бд
 	CreateNews(context.Context, *model.OneNews) (*model.OneNews, error)
@@ -26,5 +26,5 @@ type NewsRepository interface {
 	UpdateSliceNews(context.Context, *[]model.OneNews) (*[]model.OneNews, error)
 
 	// DeteleOneNewById Удалить одну запись из бд по id
-	DeteleOneNewById(context.Context, int) error
+	DeleteNewsById(context.Context, int) error
 }

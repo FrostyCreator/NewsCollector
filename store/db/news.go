@@ -2,9 +2,9 @@ package db
 
 import (
 	"context"
-	"fmt"
-	"github.com/FrostyCreator/NewsCollector/model"
 	"log"
+
+	"github.com/FrostyCreator/NewsCollector/model"
 
 	"github.com/go-pg/pg/v10"
 )
@@ -17,7 +17,8 @@ func NewNewsRepo(db *PgDB) * NewsPgRepo {
 	return &NewsPgRepo{db: db}
 }
 
-func (repo *NewsPgRepo) GetNews(ctx context.Context) (*[]model.OneNews, error) {
+// GetAllNews получить все новости из БД
+func (repo *NewsPgRepo) GetAllNews(ctx context.Context) (*[]model.OneNews, error) {
 	news := &[]model.OneNews{}
 	err := repo.db.Model(news).
 		Select()
@@ -30,7 +31,8 @@ func (repo *NewsPgRepo) GetNews(ctx context.Context) (*[]model.OneNews, error) {
 	return news, nil
 }
 
-func (repo *NewsPgRepo) GetOneNewaById(ctx context.Context, id int) (*model.OneNews, error) {
+// GetOneNewsById Получить одну новость по id
+func (repo *NewsPgRepo) GetOneNewsById(ctx context.Context, id int) (*model.OneNews, error) {
 	oneNews := &model.OneNews{}
 	err := repo.db.Model(oneNews).
 		Where("id = ?", id).
@@ -44,6 +46,7 @@ func (repo *NewsPgRepo) GetOneNewaById(ctx context.Context, id int) (*model.OneN
 	return oneNews, nil
 }
 
+// CreateNews Добавить одну новость в БД
 func (repo *NewsPgRepo) CreateNews(ctx context.Context, oneNews *model.OneNews) (*model.OneNews, error) {
 	_, err := repo.db.Model(oneNews).
 		Insert()
@@ -53,12 +56,12 @@ func (repo *NewsPgRepo) CreateNews(ctx context.Context, oneNews *model.OneNews) 
 		}
 		return nil, err
 	}
-	fmt.Println("new news - ", oneNews)
 	return oneNews, nil
 }
 
+// CreateSliceNews Добавить список новостей в БД
 func (repo *NewsPgRepo) CreateSliceNews(ctx context.Context, news *[]model.OneNews) (*[]model.OneNews, error) {
-	_, err := repo.db.Model(news).Insert()
+	_, err := repo.db.Model(news).WherePK().Insert()
 	if err != nil {
 		log.Fatal(err)
 		return nil, err
@@ -66,34 +69,49 @@ func (repo *NewsPgRepo) CreateSliceNews(ctx context.Context, news *[]model.OneNe
 	return news, nil
 }
 
+// UpdateNews Изменить новость
 func (repo *NewsPgRepo) UpdateNews(ctx context.Context, oneNews *model.OneNews) (*model.OneNews, error) {
-	_, err := repo.db.Model(oneNews).Update()
 
+	// Существует ли текущая запись
+	exist, err := repo.db.Model(oneNews).WherePK().Exists()
 	if err != nil {
-		if err == pg.ErrNoRows { //not found
-			return nil, nil
-		}
+		log.Fatal(err)
 		return nil, err
+	}
+
+	// Если существует, то изменить
+	if exist {
+		_, err = repo.db.Model(oneNews).WherePK().Update()
+		if err != nil {
+			log.Fatal(err)
+			return nil, err
+		}
+	// Или добавить
+	} else {
+		_, err := repo.CreateNews(ctx, oneNews)
+		if err != nil {
+			log.Fatal(err)
+			return nil, err
+		}
 	}
 
 	return oneNews, nil
 }
 
-func (repo *NewsPgRepo) UpdateSliceNews(ctx context.Context, oneNews *[]model.OneNews) (*[]model.OneNews, error) {
-	_, err := repo.db.Model(oneNews).Update()
-
-	if err != nil {
-		if err == pg.ErrNoRows { //not found
-			return nil, nil
+// UpdateSliceNews Изменить список новостей
+func (repo *NewsPgRepo) UpdateSliceNews(ctx context.Context, news *[]model.OneNews) (*[]model.OneNews, error) {
+	for _, n := range *news {
+		_, err := repo.UpdateNews(ctx, &n)
+		if err != nil {
+			return nil, err
 		}
-		return nil, err
 	}
-
-	return oneNews, nil
+	return news, nil
 }
 
-func (repo *NewsPgRepo) DeteleOneNewById(ctx context.Context, id int) error {
-	_, err := repo.db.Model((*model.OneNews)(nil)).
+// DeleteNewsById Удалить новость по id
+func (repo *NewsPgRepo) DeleteNewsById(ctx context.Context, id int) error {
+	_, err := repo.db.Model(new(model.OneNews)).
 		Where("id = ?", id).
 		Delete()
 	if err != nil {

@@ -3,6 +3,7 @@ package server
 import (
 	"log"
 	"net/http"
+	"strconv"
 
 	"github.com/FrostyCreator/NewsCollector/controller"
 
@@ -25,10 +26,6 @@ func NewRouter(ctrl *controller.NewsController) *Router {
 func (r Router) routes() {
 	r.router.Use(LiberalCORS)
 
-	r.router.GET("/", func(context *gin.Context) {
-		r.controller.Test(context)
-	})
-
 	r.router.GET("/update", func(context *gin.Context) {
 		err := r.controller.UpdateAllNews()
 		if err != nil {
@@ -43,15 +40,37 @@ func (r Router) routes() {
 	})
 
 	r.router.GET("/getNews", func(context *gin.Context) {
-		news, err := r.controller.GetAllNews()
+		news, err := r.controller.GetAllNewsFromDB()
 		if err != nil {
 			log.Fatal(err)
 			context.JSON(500, gin.H{
-				"message": "Произошла ошибка при обновлении данных",
+				"message": "Произошла ошибка при получении данных",
 			})
 		}
 
 		context.JSON(200, *news)
+	})
+
+	r.router.POST("/delete/:id", func(context *gin.Context) {
+		id, err := strconv.Atoi(context.Param("id"))
+		if (err != nil) {
+			log.Fatal(err)
+			context.JSON(500, gin.H{
+				"message": "Введен неверный id",
+			})
+		}
+
+		err = r.controller.DeleteNewsById(id)
+		if (err != nil) {
+			log.Fatal(err)
+			context.JSON(500, gin.H{
+				"message": "Новости с таким id не существует",
+
+			})
+		}
+		context.JSON(200, gin.H{
+			"message": "Новость удалена",
+		})
 	})
 }
 

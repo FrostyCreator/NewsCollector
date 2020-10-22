@@ -2,10 +2,10 @@ package server
 
 import (
 	"context"
-	"github.com/FrostyCreator/NewsCollector/service"
 	"log"
 
 	"github.com/FrostyCreator/NewsCollector/config"
+	"github.com/FrostyCreator/NewsCollector/service"
 )
 
 type Server struct {

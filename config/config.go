@@ -32,7 +32,7 @@ func GetConfig() *Config {
 		if envType == "" {
 			envType = "dev"
 		}
-		if err := configor.New(&configor.Config{Environment: envType}).Load(&config, "config.json"); err != nil {
+		if err := configor.New(&configor.Config{Environment: envType}).Load(&config); err != nil {
 			log.Fatal(err)
 		}
 		configBytes, err := json.MarshalIndent(config, "", "  ")

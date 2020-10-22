@@ -3,10 +3,10 @@ package main
 import (
 	"context"
 	"fmt"
-	"github.com/FrostyCreator/NewsCollector/controller"
 	"log"
 
 	"github.com/FrostyCreator/NewsCollector/config"
+	"github.com/FrostyCreator/NewsCollector/controller"
 	"github.com/FrostyCreator/NewsCollector/server"
 	"github.com/FrostyCreator/NewsCollector/store/db"
 )
@@ -29,6 +29,9 @@ func run() error {
 	if err != nil {
 		return err
 	}
+	defer pgDB.Close()
+
+
 
 	newsRepo := db.NewNewsRepo(pgDB)
 	newsController := controller.NewNewsController(ctx, newsRepo)

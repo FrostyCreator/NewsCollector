@@ -60,14 +60,16 @@ type NewsFromPerm59 struct {
 	} `json:"notifications"`
 }
 
-func (news NewsFromPerm59) ConvertToSliceOneNews() (*[]OneNews) {
+func (news NewsFromPerm59) ConvertToSliceOneNews(id *int) (*[]OneNews) {
 	result := new([]OneNews)
 	for _, n := range news.ResultData.Data {
 		*result = append(*result, OneNews{
+			ID: *id,
 			Header: n.Header,
 			URL:    n.Urls.URL,
 			Site:   "https://59.ru",
 		})
+		(*id)++
 	}
 	return result
 }
