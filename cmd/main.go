@@ -38,7 +38,11 @@ func run() error {
 	router := server.NewRouter(newsController)
 
 	// Обновление новостей в бд
-	newsController.AddNews()
+	err = newsController.UpdateAllNews()
+	if err != nil {
+		log.Fatal(err)
+		return err
+	}
 
 	// create new server instance and run http server
 	addr := ":8080"
