@@ -31,8 +31,6 @@ func run() error {
 	}
 	defer pgDB.Close()
 
-
-
 	newsRepo := db.NewNewsRepo(pgDB)
 	newsController := controller.NewNewsController(ctx, newsRepo)
 	router := server.NewRouter(newsController)

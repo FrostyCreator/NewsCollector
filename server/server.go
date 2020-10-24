@@ -27,7 +27,7 @@ func Init(ctx context.Context, config *config.Config, db service.NewsRepository,
 	s.Router.routes()
 
 	if err := s.Router.router.Run(addr); err != nil {
-		log.Fatal(err)
+		log.Println(err)
 		return nil, err
 	}
 	return s, nil

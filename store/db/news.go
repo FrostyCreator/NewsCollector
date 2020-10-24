@@ -2,6 +2,8 @@ package db
 
 import (
 	"context"
+	"errors"
+	"fmt"
 	"log"
 
 	"github.com/FrostyCreator/NewsCollector/model"
@@ -63,7 +65,7 @@ func (repo *NewsPgRepo) CreateNews(ctx context.Context, oneNews *model.OneNews) 
 func (repo *NewsPgRepo) CreateSliceNews(ctx context.Context, news *[]model.OneNews) (*[]model.OneNews, error) {
 	_, err := repo.db.Model(news).WherePK().Insert()
 	if err != nil {
-		log.Fatal(err)
+		log.Println(err)
 		return nil, err
 	}
 	return news, nil
@@ -75,7 +77,7 @@ func (repo *NewsPgRepo) UpdateNews(ctx context.Context, oneNews *model.OneNews) 
 	// Существует ли текущая запись
 	exist, err := repo.db.Model(oneNews).WherePK().Exists()
 	if err != nil {
-		log.Fatal(err)
+		log.Println(err)
 		return nil, err
 	}
 
@@ -83,14 +85,14 @@ func (repo *NewsPgRepo) UpdateNews(ctx context.Context, oneNews *model.OneNews) 
 	if exist {
 		_, err = repo.db.Model(oneNews).WherePK().Update()
 		if err != nil {
-			log.Fatal(err)
+			log.Println(err)
 			return nil, err
 		}
 	// Или добавить
 	} else {
 		_, err := repo.CreateNews(ctx, oneNews)
 		if err != nil {
-			log.Fatal(err)
+			log.Println(err)
 			return nil, err
 		}
 	}
@@ -111,15 +113,27 @@ func (repo *NewsPgRepo) UpdateSliceNews(ctx context.Context, news *[]model.OneNe
 
 // DeleteNewsById Удалить новость по id
 func (repo *NewsPgRepo) DeleteNewsById(ctx context.Context, id int) error {
-	_, err := repo.db.Model(new(model.OneNews)).
-		Where("id = ?", id).
-		Delete()
+	exist, err := repo.db.Model(new(model.OneNews)).Where("id = ?", id).Exists()
 	if err != nil {
-		if err == pg.ErrNoRows {
-			return nil
-		}
+		log.Println(err)
 		return err
 	}
 
-	return nil
+	if exist {
+		_, err := repo.db.Model(new(model.OneNews)).
+			Where("id = ?", id).
+			Delete()
+		if err != nil {
+			if err == pg.ErrNoRows {
+				return nil
+			}
+			return err
+		}
+
+		return nil
+	} else {
+		str := fmt.Sprintf("Записи в id - %s не существует", id)
+		log.Println(str)
+		return errors.New(str)
+	}
 }

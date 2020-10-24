@@ -11,6 +11,40 @@ import (
 	"github.com/gocolly/colly/v2"
 )
 
+// getAllNewsFromSites Спарсить все новости с сайтов
+func (ctr *NewsController) getAllNewsFromSites() (*[]model.OneNews, error) {
+	news := new([]model.OneNews)
+	var id *int = new(int)
+	*id = 1
+
+	news, err := getNewsFromPerm59(id);
+	if err != nil {
+		log.Println(err)
+		return nil, err
+	}
+
+	sliceNews, err := getNewsFromProperm(id)
+	if err != nil {
+		log.Println(err)
+		return nil, err
+	}
+	for _, oneNews := range *sliceNews {
+		*news = append(*news, oneNews)
+	}
+
+	sliceNews, err = getNewsFromPermkrai(id)
+	if err != nil {
+		log.Println(err)
+		return nil, err
+	}
+	for _, oneNews := range *sliceNews {
+		*news = append(*news, oneNews)
+	}
+
+	*id = 1
+	return news, err;
+}
+
 // getNewsFromPerm59 получить все новости с сайта https://59.ru
 func getNewsFromPerm59(id *int) (*[]model.OneNews, error) {
 	var newsFromPerm59 *model.NewsFromPerm59
@@ -18,24 +52,24 @@ func getNewsFromPerm59(id *int) (*[]model.OneNews, error) {
 
 	resp, err := http.Get(url)
 	if err != nil {
-		log.Fatal(err)
+		log.Println(err)
 		return nil, err
 	}
 
 	body, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
-		log.Fatal(err)
+		log.Println(err)
 		return nil, err
 	}
 
 	err = json.Unmarshal(body, &newsFromPerm59)
 	if err != nil {
-		log.Fatal(err)
+		log.Println(err)
 		return nil, err
 	}
 
 	if newsFromPerm59.ResultData.StatusCode != 200 {
-		log.Fatal("url:", url, " status code -", newsFromPerm59.ResultData.StatusCode, ", with error:", newsFromPerm59.ResultData.Error)
+		log.Println("url:", url, " status code -", newsFromPerm59.ResultData.StatusCode, ", with error:", newsFromPerm59.ResultData.Error)
 	}
 
 	return newsFromPerm59.ConvertToSliceOneNews(id), nil;
@@ -60,7 +94,7 @@ func getNewsFromProperm(id *int) (*[]model.OneNews, error) {
 
 
 	if err := c.Visit(url); err != nil {
-		log.Fatal("Ошибка во время парсинга сайта -", url)
+		log.Println("Ошибка во время парсинга сайта -", url)
 		return nil, err
 	}
 
@@ -84,45 +118,9 @@ func getNewsFromPermkrai(id *int) (*[]model.OneNews, error) {
 	})
 
 	if err := c.Visit(url); err != nil {
-		log.Fatal("Ошибка во время парсинга сайта -", url)
+		log.Println("Ошибка во время парсинга сайта -", url)
 		return nil, err
 	}
 
 	return newsFromProperm, nil
 }
-
-// getAllNewsFromSites Спарсить все новости с сайтов
-func (ctr *NewsController) getAllNewsFromSites() (*[]model.OneNews, error) {
-	news := new([]model.OneNews)
-	var id *int = new(int)
-	*id = 1
-
-	news, err := getNewsFromPerm59(id);
-	if err != nil {
-		log.Fatal(err)
-		return nil, err
-	}
-
-	sliceNews, err := getNewsFromProperm(id)
-	if err != nil {
-		log.Fatal(err)
-		return nil, err
-	}
-	for _, oneNews := range *sliceNews {
-		*news = append(*news, oneNews)
-	}
-
-	sliceNews, err = getNewsFromPermkrai(id)
-	if err != nil {
-		log.Fatal(err)
-		return nil, err
-	}
-	for _, oneNews := range *sliceNews {
-		*news = append(*news, oneNews)
-	}
-
-	*id = 1
-	return news, err;
-}
-
-

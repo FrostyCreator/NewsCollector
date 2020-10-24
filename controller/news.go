@@ -23,6 +23,7 @@ func NewNewsController(ctx context.Context, newsRep service.NewsRepository) *New
 func (ctr *NewsController) GetAllNewsFromDB() (*[]model.OneNews, error) {
 	news, err := ctr.newsRepo.GetAllNews(ctr.ctx);
 	if err != nil {
+		log.Println(err)
 		return nil, err
 	}
 	return news, err
@@ -32,13 +33,13 @@ func (ctr *NewsController) GetAllNewsFromDB() (*[]model.OneNews, error) {
 func (ctr *NewsController) UpdateAllNews() error {
 	news, err := ctr.getAllNewsFromSites()
 	if err != nil {
-		log.Fatal(err)
+		log.Println(err)
 		return err
 	}
 
 	_, err = ctr.newsRepo.UpdateSliceNews(ctr.ctx, news)
 	if err != nil {
-		log.Fatal(err)
+		log.Println(err)
 		return err
 	}
 
@@ -49,7 +50,7 @@ func (ctr *NewsController) UpdateAllNews() error {
 func (ctr *NewsController) DeleteNewsById(id int) (error) {
 	err := ctr.newsRepo.DeleteNewsById(ctr.ctx, id)
 	if err != nil {
-		log.Fatal("Ошибка при удалении новости с id - ", id )
+		log.Println("Ошибка при удалении новости с id - ", id )
 		return err
 	}
 

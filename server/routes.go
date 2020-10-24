@@ -1,11 +1,10 @@
 package server
 
 import (
+	"github.com/FrostyCreator/NewsCollector/controller"
 	"log"
 	"net/http"
 	"strconv"
-
-	"github.com/FrostyCreator/NewsCollector/controller"
 
 	"github.com/gin-gonic/gin"
 )
@@ -29,7 +28,7 @@ func (r Router) routes() {
 	r.router.GET("/update", func(context *gin.Context) {
 		err := r.controller.UpdateAllNews()
 		if err != nil {
-			log.Fatal(err)
+			log.Println(err)
 			context.JSON(500, gin.H{
 				"message": "Произошла ошибка при обновлении данных",
 			})
@@ -42,7 +41,7 @@ func (r Router) routes() {
 	r.router.GET("/getNews", func(context *gin.Context) {
 		news, err := r.controller.GetAllNewsFromDB()
 		if err != nil {
-			log.Fatal(err)
+			log.Println(err)
 			context.JSON(500, gin.H{
 				"message": "Произошла ошибка при получении данных",
 			})
@@ -51,24 +50,28 @@ func (r Router) routes() {
 		context.JSON(200, *news)
 	})
 
-	r.router.POST("/delete/:id", func(context *gin.Context) {
-		id, err := strconv.Atoi(context.Param("id"))
-		if (err != nil) {
-			log.Fatal(err)
-			context.JSON(500, gin.H{
-				"message": "Введен неверный id",
+	r.router.DELETE("/delete/:id", func(context *gin.Context) {
+		v := context.Param("id")
+
+		id, err := strconv.Atoi(v)
+		if err != nil {
+			log.Println(err)
+			context.JSON(500, gin.H {
+				"message" : "Введен неверный id",
 			})
+			return
 		}
 
 		err = r.controller.DeleteNewsById(id)
-		if (err != nil) {
-			log.Fatal(err)
-			context.JSON(500, gin.H{
-				"message": "Новости с таким id не существует",
-
+		if err != nil {
+			log.Println(err)
+			context.JSON(500, gin.H {
+				"message" : "Новости с таким id не существует",
 			})
+			return
 		}
-		context.JSON(200, gin.H{
+
+		context.JSON(200, gin.H {
 			"message": "Новость удалена",
 		})
 	})
