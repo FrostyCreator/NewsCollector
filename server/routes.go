@@ -1,11 +1,12 @@
 package server
 
 import (
-	"github.com/FrostyCreator/NewsCollector/controller"
 	"log"
-	"net/http"
 	"strconv"
 
+	"github.com/FrostyCreator/NewsCollector/controller"
+
+	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 )
 
@@ -21,9 +22,9 @@ func NewRouter(ctrl *controller.NewsController) *Router {
 	}
 }
 
-//routes lists routes for our HTTP server
+//routes Lists routes for our HTTP server
 func (r Router) routes() {
-	r.router.Use(LiberalCORS)
+	r.router.Use(cors.Default())
 
 	r.router.GET("/update", func(context *gin.Context) {
 		err := r.controller.UpdateAllNews()
@@ -76,15 +77,3 @@ func (r Router) routes() {
 		})
 	})
 }
-
-// LiberalCORS CORS settings
-func LiberalCORS(c *gin.Context) {
-	c.Header("Access-Control-Allow-Origin", "*")
-	if c.Request.Method == "OPTIONS" {
-		if len(c.Request.Header["Access-Control-Request-Headers"]) > 0 {
-			c.Header("Access-Control-Allow-Headers", c.Request.Header["Access-Control-Request-Headers"][0])
-		}
-		c.AbortWithStatus(http.StatusOK)
-	}
-}
-
