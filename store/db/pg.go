@@ -16,26 +16,19 @@ type PgDB struct {
 }
 
 func Dial(cfg config.Config) (*PgDB, error) {
-	//pgDB := pg.Connect(&pg.Options{
-	//	Addr: cfg.PgAddr,
-	//	User:  cfg.PgUser,
-	//	Password: cfg.PgPassword,
-	//	Database: cfg.PgDb,
-	//})
-
-	opt, err := pg.ParseURL("postgres://postgres:12345678@localhost:5432/newsdb?sslmode=disable")
-	if err != nil {
-		panic(err)
-	}
-
-	pgDB := pg.Connect(opt)
+	pgDB := pg.Connect(&pg.Options{
+		Addr: cfg.PgAddr,
+		User:  cfg.PgUser,
+		Password: cfg.PgPassword,
+		Database: cfg.PgDb,
+	})
 
 	if _, err := pgDB.Exec("SELECT 1"); err != nil{
 		log.Fatal(err)
 		return nil, err
 	}
 
-	err = createSchema(pgDB)
+	err := createSchema(pgDB)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -56,7 +49,6 @@ func createSchema(db *pg.DB) error {
 			Temp: true,
 		})
 		if err != nil {
-			log.Fatal(err)
 			return err
 		}
 	}
