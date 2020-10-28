@@ -4,6 +4,8 @@ import (
 	"github.com/FrostyCreator/NewsCollector/model"
 	"github.com/gocolly/colly/v2"
 	"log"
+	"strings"
+	"time"
 )
 
 // getAllNewsFromSites Спарсить все новости с сайтов
@@ -59,7 +61,11 @@ func getNewsFromPerm59(ch chan *[]model.OneNews, id *int) {
 		(*news)[e.Index].URL = e.Attr("href")
 	})
 	c.OnHTML(".central-column-container > div > article > div > div > div > time", func(e *colly.HTMLElement) {
-		(*news)[e.Index].Date = e.Attr("datetime")
+		date := strings.Replace(e.Attr("datetime"), " ", "T", 1) + ".000Z"
+		(*news)[e.Index].Date, _ = time.Parse("2006-01-02T15:04:05.000Z", date)
+	})
+	c.OnHTML(".central-column-container > div > article > div > div > p > a > span", func(e *colly.HTMLElement) {
+		(*news)[e.Index].Description = e.Text
 	})
 	if err := c.Visit(url); err != nil {
 		log.Println("Ошибка во время парсинга сайта -", url)
@@ -83,10 +89,15 @@ func getNewsFromPermkrai(ch chan *[]model.OneNews, id *int) {
 			URL: 		e.Attr("href"),
 			ImageSrc:	"https://luxury-plitka.ru/img/noimage.png",
 		})
+
 		*id++
 	})
 	c.OnHTML(".download-block_header > .date", func(e *colly.HTMLElement) {
-		(*news)[e.Index].Date = e.Text
+		date := e.Text[6:] + "-" + e.Text[3:5] + "-" + e.Text[:2]
+		(*news)[e.Index].Date, _ = time.Parse("2006-01-02", date)
+	})
+	c.OnHTML(".download-block > p", func(e *colly.HTMLElement) {
+		(*news)[e.Index].Description = e.Text
 	})
 
 	if err := c.Visit(url); err != nil {

@@ -15,19 +15,26 @@ type PgDB struct {
 }
 
 func Dial(cfg NewsCollector.Config) (*PgDB, error) {
-	pgDB := pg.Connect(&pg.Options{
-		Addr: cfg.PgAddr,
-		User:  cfg.PgUser,
-		Password: cfg.PgPassword,
-		Database: cfg.PgDb,
-	})
+	//pgDB := pg.Connect(&pg.Options{
+	//	Addr: cfg.PgAddr,
+	//	User:  cfg.PgUser,
+	//	Password: cfg.PgPassword,
+	//	Database: cfg.PgDb,
+	//})
+	//
+	//if _, err := pgDB.Exec("SELECT 1"); err != nil{
+	//	log.Println(err)
+	//	return nil, err
+	//}
 
-	if _, err := pgDB.Exec("SELECT 1"); err != nil{
-		log.Println(err)
-		return nil, err
+	opt, err := pg.ParseURL("postgres://ruslan:12345678@localhost:5432/newsdb?sslmode=disable")
+	if err != nil {
+		panic(err)
 	}
 
-	err := createSchema(pgDB)
+	pgDB := pg.Connect(opt)
+
+	err = createSchema(pgDB)
 	if err != nil {
 		log.Println(err)
 	}
