@@ -2,9 +2,10 @@ package controller
 
 import (
 	"context"
+	"log"
+
 	"github.com/FrostyCreator/NewsCollector/model"
 	"github.com/FrostyCreator/NewsCollector/store"
-	"log"
 )
 
 type NewsController struct {
@@ -14,8 +15,8 @@ type NewsController struct {
 
 func NewNewsController(ctx context.Context, newsRep store.NewsRepository) *NewsController{
 	return &NewsController{
-		ctx: ctx,
-		newsRepo: newsRep,
+		ctx: 		ctx,
+		newsRepo: 	newsRep,
 	}
 }
 

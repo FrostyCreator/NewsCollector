@@ -21,8 +21,8 @@ func NewNewsRepo(db *PgDB) *NewsPgRepo {
 
 // GetAllNews получить все новости из БД
 func (repo *NewsPgRepo) GetAllNews(ctx context.Context) (*[]model.OneNews, error) {
-	news := &[]model.OneNews{}
-	err := repo.db.Model(news).
+	news	:= &[]model.OneNews{}
+	err		:= repo.db.Model(news).
 		Select()
 	if err != nil {
 		if err == pg.ErrNoRows { //not found
@@ -35,8 +35,8 @@ func (repo *NewsPgRepo) GetAllNews(ctx context.Context) (*[]model.OneNews, error
 
 // GetOneNewsById Получить одну новость по id
 func (repo *NewsPgRepo) GetOneNewsById(ctx context.Context, id int) (*model.OneNews, error) {
-	oneNews := &model.OneNews{}
-	err := repo.db.Model(oneNews).
+	oneNews	:= &model.OneNews{}
+	err		:= repo.db.Model(oneNews).
 		Where("id = ?", id).
 		Select()
 	if err != nil {
@@ -73,7 +73,6 @@ func (repo *NewsPgRepo) CreateSliceNews(ctx context.Context, news *[]model.OneNe
 
 // UpdateNews Изменить новость
 func (repo *NewsPgRepo) UpdateNews(ctx context.Context, oneNews *model.OneNews) (*model.OneNews, error) {
-
 	// Существует ли текущая запись
 	exist, err := repo.db.Model(oneNews).WherePK().Exists()
 	if err != nil {
@@ -132,8 +131,7 @@ func (repo *NewsPgRepo) DeleteNewsById(ctx context.Context, id int) error {
 
 		return nil
 	} else {
-		str := fmt.Sprintf("Записи в id - %s не существует", id)
-		log.Println(str)
+		str := fmt.Sprintf("Записи с id - %d не существует", id)
 		return errors.New(str)
 	}
 }

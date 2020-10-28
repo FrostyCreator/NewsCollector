@@ -3,12 +3,12 @@ package main
 import (
 	"context"
 	"fmt"
-	"github.com/FrostyCreator/NewsCollector"
-	"github.com/FrostyCreator/NewsCollector/store"
 	"log"
 
+	"github.com/FrostyCreator/NewsCollector"
 	"github.com/FrostyCreator/NewsCollector/controller"
 	"github.com/FrostyCreator/NewsCollector/server"
+	"github.com/FrostyCreator/NewsCollector/store"
 )
 
 func main(){

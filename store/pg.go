@@ -2,9 +2,11 @@ package store
 
 import (
 	"fmt"
+	"log"
+	"time"
+
 	"github.com/FrostyCreator/NewsCollector"
 	"github.com/FrostyCreator/NewsCollector/model"
-	"log"
 
 	"github.com/go-pg/pg/v10"
 	"github.com/go-pg/pg/v10/orm"
@@ -34,7 +36,7 @@ func Dial(cfg NewsCollector.Config) (*PgDB, error) {
 
 	db := &PgDB{pgDB}
 
-	//go KeepAlivePg(db, cfg)
+	go KeepAlivePg(db, cfg)
 	fmt.Println("DB work")
 
 	return db, nil
@@ -47,9 +49,8 @@ func createSchema(db *pg.DB) error {
 	}
 
 	for _, m := range models {
-
 		err := db.Model(m).CreateTable(&orm.CreateTableOptions{
-			Temp: true,
+			Temp: false,
 		})
 		if err != nil {
 			return err
@@ -58,26 +59,26 @@ func createSchema(db *pg.DB) error {
 	return nil
 }
 
-//func KeepAlivePg(pgDB *PgDB, cfg NewsCollector.Config) {
-//	var err error
-//	for {
-//		// Check if PostgreSQL is alive every 3 seconds
-//		time.Sleep(time.Second * 3)
-//		lostConnect := false
-//		if pgDB == nil {
-//			lostConnect = true
-//		} else if _, err = pgDB.Exec("SELECT 1"); err != nil {
-//			lostConnect = true
-//		}
-//		if !lostConnect {
-//			continue
-//		}
-//		log.Println("[store.KeepAlivePg] Lost PostgreSQL connection. Restoring...")
-//		pgDB, err = Dial(cfg)
-//		if err != nil {
-//			log.Println(err)
-//			continue
-//		}
-//		log.Println("[store.KeepAlivePg] PostgreSQL reconnected")
-//	}
-//}
+func KeepAlivePg(pgDB *PgDB, cfg NewsCollector.Config) {
+	var err error
+	for {
+		// Check if PostgreSQL is alive every 3 seconds
+		time.Sleep(time.Second * 3)
+		lostConnect := false
+		if pgDB == nil {
+			lostConnect = true
+		} else if _, err = pgDB.Exec("SELECT 1"); err != nil {
+			lostConnect = true
+		}
+		if !lostConnect {
+			continue
+		}
+		log.Println("[store.KeepAlivePg] Lost PostgreSQL connection. Restoring...")
+		pgDB, err = Dial(cfg)
+		if err != nil {
+			log.Println(err)
+			continue
+		}
+		log.Println("[store.KeepAlivePg] PostgreSQL reconnected")
+	}
+}

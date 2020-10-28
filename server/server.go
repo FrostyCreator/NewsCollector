@@ -2,9 +2,10 @@ package server
 
 import (
 	"context"
+	"log"
+
 	"github.com/FrostyCreator/NewsCollector"
 	"github.com/FrostyCreator/NewsCollector/store"
-	"log"
 )
 
 type Server struct {
@@ -25,7 +26,7 @@ func Init(ctx context.Context, config *NewsCollector.Config, db store.NewsReposi
 
 	s.Router.routes()
 
-	if err := s.Router.router.Run(addr); err != nil {
+	if err := s.Router.router.Start(addr); err != nil {
 		log.Println(err)
 		return nil, err
 	}
