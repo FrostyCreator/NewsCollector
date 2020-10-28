@@ -3,16 +3,16 @@ package controller
 import (
 	"context"
 	"github.com/FrostyCreator/NewsCollector/model"
-	"github.com/FrostyCreator/NewsCollector/service"
+	"github.com/FrostyCreator/NewsCollector/store"
 	"log"
 )
 
 type NewsController struct {
-	ctx			context.Context
-	newsRepo	service.NewsRepository
+	ctx      context.Context
+	newsRepo store.NewsRepository
 }
 
-func NewNewsController(ctx context.Context, newsRep service.NewsRepository) *NewsController{
+func NewNewsController(ctx context.Context, newsRep store.NewsRepository) *NewsController{
 	return &NewsController{
 		ctx: ctx,
 		newsRepo: newsRep,

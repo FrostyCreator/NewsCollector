@@ -1,4 +1,4 @@
-package config
+package NewsCollector
 
 import (
 	"encoding/json"

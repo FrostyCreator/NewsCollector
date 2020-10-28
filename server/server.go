@@ -2,21 +2,20 @@ package server
 
 import (
 	"context"
+	"github.com/FrostyCreator/NewsCollector"
+	"github.com/FrostyCreator/NewsCollector/store"
 	"log"
-
-	"github.com/FrostyCreator/NewsCollector/config"
-	"github.com/FrostyCreator/NewsCollector/service"
 )
 
 type Server struct {
 	context 	context.Context
-	config 		*config.Config
+	config 		*NewsCollector.Config
 	Router
-	NewsPgRepo	service.NewsRepository
+	NewsPgRepo store.NewsRepository
 }
 
 // Init returns new server instance
-func Init(ctx context.Context, config *config.Config, db service.NewsRepository, r Router, addr string) (*Server, error) {
+func Init(ctx context.Context, config *NewsCollector.Config, db store.NewsRepository, r Router, addr string) (*Server, error) {
 	s := &Server{
 		context:	ctx,
 		config:		config,

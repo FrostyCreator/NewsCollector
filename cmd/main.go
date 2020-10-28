@@ -3,12 +3,12 @@ package main
 import (
 	"context"
 	"fmt"
+	"github.com/FrostyCreator/NewsCollector"
+	"github.com/FrostyCreator/NewsCollector/store"
 	"log"
 
-	"github.com/FrostyCreator/NewsCollector/config"
 	"github.com/FrostyCreator/NewsCollector/controller"
 	"github.com/FrostyCreator/NewsCollector/server"
-	"github.com/FrostyCreator/NewsCollector/store/db"
 )
 
 func main(){
@@ -22,16 +22,16 @@ func run() error {
 	ctx := context.Background()
 
 	// config
-	cfg := config.GetConfig()
+	cfg := NewsCollector.GetConfig()
 
 	// connect to database
-	pgDB, err := db.Dial(*cfg)
+	pgDB, err := store.Dial(*cfg)
 	if err != nil {
 		return err
 	}
 	defer pgDB.Close()
 
-	newsRepo := db.NewNewsRepo(pgDB)
+	newsRepo := store.NewNewsRepo(pgDB)
 	newsController := controller.NewNewsController(ctx, newsRepo)
 	router := server.NewRouter(newsController)
 

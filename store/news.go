@@ -1,4 +1,4 @@
-package db
+package store
 
 import (
 	"context"
@@ -15,7 +15,7 @@ type NewsPgRepo struct {
 	db *PgDB
 }
 
-func NewNewsRepo(db *PgDB) * NewsPgRepo {
+func NewNewsRepo(db *PgDB) *NewsPgRepo {
 	return &NewsPgRepo{db: db}
 }
 
